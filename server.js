@@ -1,25 +1,15 @@
-//
-// # SimpleServer
-//
-// A simple chat server using Socket.IO, Express, and Async.
-//
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
 var express = require('express');
-var request = require("request");
+var request = require('request');
 var mongoose = require('mongoose');
+var config = require('./config');
 
-//
-// ## SimpleServer `SimpleServer(obj)`
-//
-// Creates a new instance of SimpleServer with the following options:
-//  * `port` - The HTTP port to listen on. If `process.env.PORT` is set, _it overrides this value_.
-//
 var router = express();
 var server = http.createServer(router);
 var io = socketio.listen(server);
-var populationDb = mongoose.connect("mongodb://root:root@ds023480.mlab.com:23480/population");
+var populationDb = mongoose.connect(config.url);
 var countriesSchema = mongoose.Schema({
     name: String
 },{collection:"countries"});
@@ -27,18 +17,18 @@ var countriesCollection = populationDb.model('countries',countriesSchema);
 
 router.use(express.static(path.resolve(__dirname, 'client')));
 
-io.on('connection', function (socket) {
+io.on('connection', (socket) => {
   
-    getCountryList(function(countriesObj){
+    getCountryList( (countriesObj) => {
       socket.emit('country', countriesObj);
     });
 
-    socket.on ('setSelectedCountry', function (msg) {
+    socket.on ('setSelectedCountry', (msg) => {
       if(msg){
         var populationApiUrl = "http://api.population.io:80/1.0/population/";
         var selectedCountry = msg.selectedCountry;
         populationApiUrl = populationApiUrl + selectedCountry + "/today-and-tomorrow/";
-        getTodayAndTomorrow(populationApiUrl, function(todayAndTomorrow, err){
+        getTodayAndTomorrow(populationApiUrl, (todayAndTomorrow, err) => {
         if(err) console.log(err);
         todayAndTomorrow.total_population.splice(1,1);
         todayAndTomorrow.total_population[0]['country'] = selectedCountry;
@@ -48,14 +38,14 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('disconnect', function () {
+  socket.on('disconnect', () => {
 
   });
 
 });
 
 function getTodayAndTomorrow(populationApiUrl, callback){
-  request(populationApiUrl, function (error, response, body) {
+  request(populationApiUrl, (error, response, body) => {
     if (!error && response.statusCode == 200) {
       callback(JSON.parse(body));
       //body = JSON.parse(body);
@@ -68,7 +58,7 @@ function getTodayAndTomorrow(populationApiUrl, callback){
 function getCountryList(callback){
   var countriesArray = [];
   var countriesObj = {};
-  countriesCollection.find({}, null, {sort: {name: 1}}, function(err, countries) {
+  countriesCollection.find({}, null, {sort: {name: 1}}, (err, countries) => {
     if(err) console.log(err);
     for (var i = 0, len = countries.length; i < len; i++) {
       countriesArray.push(countries[i].name);
@@ -78,15 +68,10 @@ function getCountryList(callback){
   });
 }
 
-
-
-
-
-
 function insertCountries(body){
   for (var i = 0, len = body.countries.length; i < len; i++) {
     var newCountry = new countriesCollection({name : body.countries[i]});
-    newCountry.save(function(err){
+    newCountry.save( (err) => {
       if (err) return console.log(err);
       console.log(body.countries[i] + " adında ülke kaydedildi.");
     });

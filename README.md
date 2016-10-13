@@ -1,23 +1,25 @@
-
-     ,-----.,--.                  ,--. ,---.   ,--.,------.  ,------.
-    '  .--./|  | ,---. ,--.,--. ,-|  || o   \  |  ||  .-.  \ |  .---'
-    |  |    |  || .-. ||  ||  |' .-. |`..'  |  |  ||  |  \  :|  `--, 
-    '  '--'\|  |' '-' ''  ''  '\ `-' | .'  /   |  ||  '--'  /|  `---.
-     `-----'`--' `---'  `----'  `---'  `--'    `--'`-------' `------'
+			 _____                  _       _   _             
+			|  __ \                | |     | | (_)            
+			| |__) |__  _ __  _   _| | __ _| |_ _  ___  _ __  
+			|  ___/ _ \| '_ \| | | | |/ _` | __| |/ _ \| '_ \ 
+			| |  | (_) | |_) | |_| | | (_| | |_| | (_) | | | |
+			|_|   \___/| .__/ \__,_|_|\__,_|\__|_|\___/|_| |_|
+			           | |                                    
+			           |_|           
     ----------------------------------------------------------------- 
 
 
-Welcome to your Node.js project on Cloud9 IDE!
+Welcome to my Node.js project on Mongolab!
 
-This chat example showcases how to use `socket.io` with a static `express` server.
+This show the population of countries for today
 
 ## Running the server
 
-1) Open `server.js` and start the app by clicking on the "Run" button in the top menu.
 
-2) Alternatively you can launch the app from the Terminal:
+1) Enter project directory and run npm install or yarn.
+
+2) You can launch the app from the Terminal:
 
     $ node server.js
 
-Once the server is running, open the project in the shape of 'https://projectname-username.c9.io/'. As you enter your name, watch the Users list (on the left) update. Once you press Enter or Send, the message is shared with all connected clients.
 # population
