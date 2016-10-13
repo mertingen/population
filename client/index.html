@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en" ng-app>
+  <head>
+    <title>Population of Countries</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
+    <style>
+     #chartdiv {
+      	width		: 100%;
+      	height		: 435px;
+      	font-size	: 11px;
+      	margin-left : 170px;
+      }																	
+      body {
+        padding-top: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" ng-controller="ChatController">
+      <div class="page-header">
+        <h1>The population of countries for today</h1>
+        <span>Select a country please.</span>
+      </div>
+      <div class="row">
+        <div class="span9">
+          <div class="row controls">
+            <select id="countries">
+            </select>
+            <button type="button" style="float:right;" id="refresh" class="btn btn-primary btn-sm">Refresh</button>
+          </div>
+          <div id="chartdiv"></div>
+            <div class="container-fluid">
+              <div class="row text-center" style="overflow:hidden;">
+            		<div class="col-sm-3" style="float: none !important;display: inline-block;">
+            			<label class="text-left">Angle:</label>
+            			<input class="chart-input" data-property="angle" type="range" min="0" max="60" value="40" step="1"/>	
+            		</div>
+            
+            		<div class="col-sm-3" style="float: none !important;display: inline-block;">
+            			<label class="text-left">Depth:</label>
+            			<input class="chart-input" data-property="depth3D" type="range" min="1" max="120" value="100" step="1"/>
+            		</div>
+            	</div>
+            </div>																	
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/funnel.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+    <script>
+    $( document ).ready(function() {
+      
+        var socket = io.connect();
+        socket.connect('https://population-mrtsmsk0.c9users.io/');
+        socket.on("connect", function () {  
+            console.log("Connected!");
+        });
+
+        socket.on('country', function (data) {
+          $.each(data.countries, function(key, value) {   
+             $('#countries')
+                 .append($("<option></option>")
+                  .attr("value",value)
+                  .text(value)); 
+              });
+        });
+        
+        $( "select" ).change(function () {
+            var str = "";
+            $( "select option:selected" ).each(function() {
+              str += $( this ).text();
+            });
+            socket.emit ('setSelectedCountry', {selectedCountry: str});
+          }).change();
+          
+        var countriesObj = [];
+        socket.on('todayAndTomorrowData', function(data){
+          countriesObj.push(data.total_population[0]);
+          chart.dataProvider = countriesObj;
+          chart.validateData();
+        });
+        
+        $('#refresh').click(function(){
+          chart.dataProvider = [];
+          countriesObj = [];
+          chart.validateData();
+        });
+
+        ///////////Am Chart Config/////////////
+
+        var chart = AmCharts.makeChart( "chartdiv", {
+          "type": "funnel",
+          "theme": "light",
+          "dataProvider": [],
+          "balloon": {
+            "fixedPosition": true
+          },
+          "valueField": "population",
+          "titleField": "country",
+          "marginRight": 240,
+          "marginLeft": 50,
+          "startX": -500,
+          "depth3D": 100,
+          "angle": 40,
+          "outlineAlpha": 1,
+          "outlineColor": "#FFFFFF",
+          "outlineThickness": 2,
+          "labelPosition": "right",
+          "balloonText": "[[country]]: [[population]]",
+          "export": {
+            "enabled": true
+          }
+        } );
+        jQuery( '.chart-input' ).off().on( 'input change', function() {
+          var property = jQuery( this ).data( 'property' );
+          var target = chart;
+          var value = Number( this.value );
+          chart.startDuration = 0;
+        
+          if ( property == 'innerRadius' ) {
+            value += "%";
+          }
+        
+          target[ property ] = value;
+          chart.validateNow();
+        });
+    });
+    </script>
+  </body>
+</html>
